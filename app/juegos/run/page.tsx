@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Play, RotateCcw } from 'lucide-react';
+import { usePuntos } from '@/app/context/PuntosContext';
 
 // --- CONFIGURACIÓN DE FOTOS ---
 const FOTO_ELLA = "/run/nerea.png"; 
@@ -25,6 +26,7 @@ const FUERZA_SALTO = 12;
 const MIN_DISTANCIA = 350; 
 
 export default function RunnerGame() {
+  const { puntos: puntosGlobales, agregarPuntos } = usePuntos();
   const [jugando, setJugando] = useState(false);
   const [puntos, setPuntos] = useState(0);
   const [gameOver, setGameOver] = useState(false);
@@ -32,6 +34,7 @@ export default function RunnerGame() {
   const personajeRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number | undefined>(undefined);
   const scoreRef = useRef(0);
+  const distanciaRef = useRef(0); // Rastrear distancia recorrida
   
   const gameState = useRef({
     personajeY: 0,
@@ -52,9 +55,12 @@ export default function RunnerGame() {
 
   // --- MOTOR DEL JUEGO ---
   const update = (time: number) => {
-    // Calcular velocidad actual basada en puntos (aumenta cada 50 puntos)
-    const velocidadActual = VELOCIDAD_BASE + (scoreRef.current / 50) * 1.5;
-    const frecuenciaObstaculos = 0.015 + (scoreRef.current / 100) * 0.005; // También aumenta la frecuencia
+    // Calcular velocidad actual basada en distancia (crecimiento muy moderado)
+    const velocidadActual = VELOCIDAD_BASE + (distanciaRef.current / 5000) * 1;
+    const frecuenciaObstaculos = 0.015 + (distanciaRef.current / 5000) * 0.003;
+    
+    // Incrementar distancia de forma moderada (dividir entre 2 para que sea lento)
+    distanciaRef.current += velocidadActual * 0.5;
     
     // 1. Físicas Personaje
     gameState.current.personajeY += gameState.current.velocidadY;
@@ -91,7 +97,7 @@ export default function RunnerGame() {
 
     if (puedeGenerar) {
         if (Math.random() < frecuenciaObstaculos) {
-            const esMalo = Math.random() > 0.4;
+            const esMalo = Math.random() > 0.2; // Menos personajes buenos (20% bueno, 80% malo)
             const lista = esMalo ? FOTOS_MALAS : FOTOS_BUENAS; // <--- CORREGIDO: Usamos las listas de fotos
             
             gameState.current.obstaculos.push({
@@ -116,8 +122,9 @@ export default function RunnerGame() {
                     return; 
                 } else if (!obs.colisionado && obs.tipo === 'bueno') {
                     obs.colisionado = true;
-                    // obs.emoji = "✨"; // <--- COMENTADO: No sobreescribimos la ruta con un emoji para no romper la imagen
-                    scoreRef.current += 10;
+                    // Puntos basados en distancia: 5 base + más según cuán lejos llegues
+                    const puntosGanados = 5 + Math.floor(distanciaRef.current / 500);
+                    scoreRef.current += puntosGanados;
                     setPuntos(scoreRef.current);
                 }
             }
@@ -142,6 +149,7 @@ export default function RunnerGame() {
   const morir = () => {
     setGameOver(true);
     setJugando(false);
+    agregarPuntos(scoreRef.current); // Agregar puntos al contexto global
     if (requestRef.current) cancelAnimationFrame(requestRef.current);
   };
 
@@ -150,6 +158,7 @@ export default function RunnerGame() {
     gameState.current.personajeY = 0;
     gameState.current.velocidadY = 0;
     scoreRef.current = 0;
+    distanciaRef.current = 0; // Resetear distancia
     setPuntos(0);
     setGameOver(false);
     setJugando(true);
@@ -160,8 +169,14 @@ export default function RunnerGame() {
         className="min-h-screen bg-blue-50 flex flex-col items-center overflow-hidden pb-24 touch-none select-none" 
         onPointerDown={saltar} 
     >
+      {/* Contador de puntos globales */}
+      <div className="absolute top-4 left-4 bg-yellow-400 px-4 py-2 rounded-full shadow font-bold text-lg text-gray-800 z-10">
+        💰 {puntosGlobales}
+      </div>
+      
+      {/* Marcador actual */}
       <div className="absolute top-4 right-4 bg-white px-4 py-2 rounded-full shadow font-bold text-xl text-blue-600 z-10">
-        Puntos: {puntos}
+        {puntos} pts
       </div>
 
       <div className="absolute top-4 left-4 z-10">
