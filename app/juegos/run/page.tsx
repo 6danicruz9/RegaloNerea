@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Play, RotateCcw } from 'lucide-react';
-import { usePuntos } from '@/app/context/PuntosContext';
+// Asegúrate de que la ruta es correcta (si usas @/ o ../..)
+import { usePuntos } from '../../context/PuntosContext';
 
 // --- CONFIGURACIÓN DE FOTOS ---
 const FOTO_ELLA = "/run/nerea.png"; 
@@ -26,15 +27,17 @@ const FUERZA_SALTO = 12;
 const MIN_DISTANCIA = 350; 
 
 export default function RunnerGame() {
-  const { puntos: puntosGlobales, agregarPuntos } = usePuntos();
+  // 1. CORRECCIÓN: Usamos 'sumarPuntos' que es como se llama en el Contexto
+  const { puntos: puntosGlobales, sumarPuntos } = usePuntos();
+  
   const [jugando, setJugando] = useState(false);
-  const [puntos, setPuntos] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [puntosPartida, setPuntosPartida] = useState(0); // Para ver los puntos MIENTRAS juegas
   
   const personajeRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number | undefined>(undefined);
   const scoreRef = useRef(0);
-  const distanciaRef = useRef(0); // Rastrear distancia recorrida
+  const distanciaRef = useRef(0); 
   
   const gameState = useRef({
     personajeY: 0,
@@ -55,11 +58,9 @@ export default function RunnerGame() {
 
   // --- MOTOR DEL JUEGO ---
   const update = (time: number) => {
-    // Calcular velocidad actual basada en distancia (crecimiento muy moderado)
     const velocidadActual = VELOCIDAD_BASE + (distanciaRef.current / 5000) * 1;
     const frecuenciaObstaculos = 0.015 + (distanciaRef.current / 5000) * 0.003;
     
-    // Incrementar distancia de forma moderada (dividir entre 2 para que sea lento)
     distanciaRef.current += velocidadActual * 0.5;
     
     // 1. Físicas Personaje
@@ -76,14 +77,14 @@ export default function RunnerGame() {
         personajeRef.current.style.bottom = `${gameState.current.personajeY}px`;
     }
 
-    // 2. Mover Obstáculos (con velocidad dinámica)
+    // 2. Mover Obstáculos
     gameState.current.obstaculos.forEach(obs => {
         obs.x -= velocidadActual;
     });
     
     gameState.current.obstaculos = gameState.current.obstaculos.filter(obs => obs.x > -50);
 
-    // --- GENERACIÓN INTELIGENTE ---
+    // --- GENERACIÓN ---
     const ultimo = gameState.current.obstaculos[gameState.current.obstaculos.length - 1];
     
     let puedeGenerar = false;
@@ -97,8 +98,8 @@ export default function RunnerGame() {
 
     if (puedeGenerar) {
         if (Math.random() < frecuenciaObstaculos) {
-            const esMalo = Math.random() > 0.2; // Menos personajes buenos (20% bueno, 80% malo)
-            const lista = esMalo ? FOTOS_MALAS : FOTOS_BUENAS; // <--- CORREGIDO: Usamos las listas de fotos
+            const esMalo = Math.random() > 0.3; // Ajustado a 30% bueno / 70% malo
+            const lista = esMalo ? FOTOS_MALAS : FOTOS_BUENAS;
             
             gameState.current.obstaculos.push({
                 id: Date.now() + Math.random(),
@@ -122,10 +123,12 @@ export default function RunnerGame() {
                     return; 
                 } else if (!obs.colisionado && obs.tipo === 'bueno') {
                     obs.colisionado = true;
-                    // Puntos basados en distancia: 5 base + más según cuán lejos llegues
-                    const puntosGanados = 5 + Math.floor(distanciaRef.current / 500);
+                    // Lógica de puntos: Sumamos +10 por cada objeto bueno
+                    const puntosGanados = 10; 
                     scoreRef.current += puntosGanados;
-                    setPuntos(scoreRef.current);
+                    
+                    // Actualizamos el estado visual (para que se vea el número subir)
+                    setPuntosPartida(scoreRef.current);
                 }
             }
         }
@@ -149,7 +152,12 @@ export default function RunnerGame() {
   const morir = () => {
     setGameOver(true);
     setJugando(false);
-    agregarPuntos(scoreRef.current); // Agregar puntos al contexto global
+    
+    // 2. CORRECCIÓN: Guardamos los puntos en Firebase al morir
+    if (scoreRef.current > 0) {
+        sumarPuntos(scoreRef.current);
+    }
+    
     if (requestRef.current) cancelAnimationFrame(requestRef.current);
   };
 
@@ -158,8 +166,8 @@ export default function RunnerGame() {
     gameState.current.personajeY = 0;
     gameState.current.velocidadY = 0;
     scoreRef.current = 0;
-    distanciaRef.current = 0; // Resetear distancia
-    setPuntos(0);
+    distanciaRef.current = 0;
+    setPuntosPartida(0); // Reiniciar marcador visual
     setGameOver(false);
     setJugando(true);
   };
@@ -169,27 +177,28 @@ export default function RunnerGame() {
         className="min-h-screen bg-blue-50 flex flex-col items-center overflow-hidden pb-24 touch-none select-none" 
         onPointerDown={saltar} 
     >
-      {/* Contador de puntos globales */}
-      <div className="absolute top-4 left-4 bg-yellow-400 px-4 py-2 rounded-full shadow font-bold text-lg text-gray-800 z-10">
+      {/* Contador GLOBAL (Total acumulado) */}
+      <div className="absolute top-4 left-4 bg-yellow-400 px-4 py-2 rounded-full shadow font-bold text-lg text-gray-800 z-10 border-2 border-yellow-500">
         💰 {puntosGlobales}
       </div>
       
-      {/* Marcador actual */}
-      <div className="absolute top-4 right-4 bg-white px-4 py-2 rounded-full shadow font-bold text-xl text-blue-600 z-10">
-        {puntos} pts
+      {/* Marcador ACTUAL (Partida en curso) */}
+      <div className="absolute top-4 right-4 bg-white px-4 py-2 rounded-full shadow font-bold text-xl text-blue-600 z-10 border border-blue-100">
+        {/* 3. CORRECCIÓN: Usamos el estado local 'puntosPartida' */}
+        +{puntosPartida} pts
       </div>
 
-      <div className="absolute top-4 left-4 z-10">
+      <div className="absolute top-4 left-4 z-10 mt-12">
          <Link href="/juegos" className="p-2 bg-white rounded-full shadow text-gray-600 block">
             <ArrowLeft />
          </Link>
       </div>
 
-      <h1 className="mt-16 text-2xl font-bold text-blue-300 opacity-50">Toca para saltar</h1>
+      <h1 className="mt-24 text-2xl font-bold text-blue-300 opacity-50">Toca para saltar</h1>
 
       <div className="relative w-full max-w-2xl h-64 bg-white border-b-4 border-gray-400 mt-8 overflow-hidden">
         
-        {/* --- CAMBIO PRINCIPAL AQUÍ (FOTOS DEL PERSONAJE) --- */}
+        {/* PERSONAJE */}
         <div 
             ref={personajeRef}
             className="absolute left-12 z-20 will-change-transform"
@@ -202,7 +211,7 @@ export default function RunnerGame() {
             />
         </div>
 
-        {/* --- CAMBIO PRINCIPAL AQUÍ (FOTOS DE OBJETOS) --- */}
+        {/* OBJETOS */}
         {objetos.map(obj => (
             <div 
                 key={obj.id}
@@ -233,18 +242,18 @@ export default function RunnerGame() {
       )}
 
       {gameOver && (
-        <div className="mt-8 text-center bg-red-600 p-8 rounded-3xl shadow-2xl z-30 max-w-xl mx-auto">
+        <div className="mt-8 text-center bg-red-600 p-8 rounded-3xl shadow-2xl z-30 max-w-xl mx-auto border-4 border-red-800">
             <img 
                 src={FOTO_GAME_OVER} 
                 alt="Game Over"
-                className="w-48 h-48 object-contain mx-auto mb-6" 
+                className="w-32 h-32 object-contain mx-auto mb-4 bg-white rounded-full p-2" 
             />
-            <h2 className="text-5xl font-bold text-white mb-4">¡GAME OVER!</h2>
-            <p className="text-white text-lg mb-4">Te chocaste.</p>
-            <p className="text-2xl font-bold mb-6 text-yellow-300">Puntuación: {puntos}</p>
+            <h2 className="text-4xl font-bold text-white mb-2">¡GAME OVER!</h2>
+            <p className="text-white text-lg mb-4">¡Has conseguido {puntosPartida} puntos!</p>
+            
             <button 
                 onPointerDown={(e) => { e.stopPropagation(); reiniciar(); }} 
-                className="bg-blue-500 text-white px-8 py-3 rounded-xl font-bold text-lg flex items-center gap-2 mx-auto hover:bg-blue-600 transition"
+                className="bg-white text-red-600 px-8 py-3 rounded-xl font-bold text-lg flex items-center gap-2 mx-auto hover:bg-gray-100 transition shadow-lg"
             >
                 <RotateCcw /> Reintentar
             </button>

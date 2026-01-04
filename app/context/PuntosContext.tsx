@@ -1,63 +1,61 @@
 'use client';
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { db } from '../lib/firebase'; // Importamos la conexión que acabas de crear
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 interface PuntosContextType {
   puntos: number;
-  setPuntos: (puntos: number) => void;
+  sumarPuntos: (cantidad: number) => void;
   agregarPuntos: (cantidad: number) => void;
-  usarPuntos: (cantidad: number) => boolean;
 }
 
 const PuntosContext = createContext<PuntosContextType | undefined>(undefined);
 
-export function PuntosProvider({ children }: { children: React.ReactNode }) {
-  const [puntos, setPuntosState] = useState(0);
-  const [cargado, setCargado] = useState(false);
+export function PuntosProvider({ children }: { children: ReactNode }) {
+  const [puntos, setPuntos] = useState(0);
 
-  // Cargar puntos del localStorage al montar
+  // 1. ESCUCHAR PUNTOS EN TIEMPO REAL (Al cargar la web)
   useEffect(() => {
-    const puntosGuardados = localStorage.getItem('puntos_nerea');
-    if (puntosGuardados) {
-      setPuntosState(parseInt(puntosGuardados, 10));
-    }
-    setCargado(true);
+    // Nos conectamos al documento 'puntuaciones/nerea' en la base de datos
+    const unsubscribe = onSnapshot(doc(db, "puntuaciones", "nerea"), (docSnap) => {
+      if (docSnap.exists()) {
+        // Si ya existen puntos guardados, los ponemos en la web
+        setPuntos(docSnap.data().total || 0);
+      } else {
+        // Si es la primera vez que se entra, creamos el documento con 0
+        setDoc(docSnap.ref, { total: 0 });
+      }
+    });
+    
+    // Esto corta la conexión cuando se cierra la web para no gastar datos
+    return () => unsubscribe();
   }, []);
 
-  // Guardar puntos en localStorage cada vez que cambien
-  useEffect(() => {
-    if (cargado) {
-      localStorage.setItem('puntos_nerea', puntos.toString());
+  // 2. GUARDAR PUNTOS (Cuando gana)
+  const sumarPuntos = async (cantidad: number) => {
+    // Calculamos la nueva suma
+    const nuevoTotal = puntos + cantidad;
+    
+    // Lo subimos a la nube de Google
+    try {
+      await setDoc(doc(db, "puntuaciones", "nerea"), { 
+        total: nuevoTotal
+      }, { merge: true }); // 'merge: true' respeta otros datos si los hubiera
+    } catch (e) {
+      console.error("Error guardando en la nube:", e);
     }
-  }, [puntos, cargado]);
-
-  const setPuntos = (cantidad: number) => {
-    setPuntosState(Math.max(0, cantidad));
-  };
-
-  const agregarPuntos = (cantidad: number) => {
-    setPuntosState((prev) => prev + cantidad);
-  };
-
-  const usarPuntos = (cantidad: number): boolean => {
-    if (puntos >= cantidad) {
-      setPuntosState((prev) => prev - cantidad);
-      return true;
-    }
-    return false;
   };
 
   return (
-    <PuntosContext.Provider value={{ puntos, setPuntos, agregarPuntos, usarPuntos }}>
+    <PuntosContext.Provider value={{ puntos, sumarPuntos, agregarPuntos: sumarPuntos }}>
       {children}
     </PuntosContext.Provider>
   );
 }
 
+// Hook para usar los puntos en cualquier parte de la web
 export function usePuntos() {
   const context = useContext(PuntosContext);
-  if (!context) {
-    throw new Error('usePuntos debe ser usado dentro de PuntosProvider');
-  }
+  if (!context) throw new Error('usePuntos debe usarse dentro de PuntosProvider');
   return context;
 }
