@@ -63,6 +63,14 @@ export default function RunnerGame() {
     
     distanciaRef.current += velocidadActual * 0.5;
     
+    // SISTEMA DE PUNTOS: Suma automática por distancia (como el dino de Google)
+    // Por cada 100 unidades de distancia, suma 1 punto (ajustado a la velocidad del juego)
+    const puntosDistancia = Math.floor(distanciaRef.current / 100);
+    if (puntosDistancia > scoreRef.current) {
+      scoreRef.current = puntosDistancia;
+      setPuntosPartida(scoreRef.current);
+    }
+    
     // 1. Físicas Personaje
     gameState.current.personajeY += gameState.current.velocidadY;
     gameState.current.velocidadY -= GRAVEDAD;
@@ -123,11 +131,8 @@ export default function RunnerGame() {
                     return; 
                 } else if (!obs.colisionado && obs.tipo === 'bueno') {
                     obs.colisionado = true;
-                    // Lógica de puntos: Sumamos +10 por cada objeto bueno
-                    const puntosGanados = 10; 
-                    scoreRef.current += puntosGanados;
-                    
-                    // Actualizamos el estado visual (para que se vea el número subir)
+                    // Al coger un objeto bueno, suma +5 puntos
+                    scoreRef.current += 5;
                     setPuntosPartida(scoreRef.current);
                 }
             }

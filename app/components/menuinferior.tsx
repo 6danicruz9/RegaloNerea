@@ -32,7 +32,7 @@ export default function MenuInferior() {
 
       <Link href="/regalos" className="flex flex-col items-center text-gray-400 hover:text-pink-600 transition-colors">
           <Gift size={26} />
-          <span className="text-[10px] font-medium mt-1">Vales</span>
+          <span className="text-[10px] font-medium mt-1">Cupones</span>
       </Link>
 
     </nav>
