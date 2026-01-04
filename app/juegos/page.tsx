@@ -14,12 +14,12 @@ export default function MenuJuegos() {
             <Puzzle size={28} />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-800">Memory Love</h2>
-            <p className="text-xs text-gray-400">Encuentra las parejas</p>
+            <h2 className="text-xl font-bold text-gray-800">Memoria</h2>
+            <p className="text-xs text-gray-400">Me dijiste que te gustaba</p>
           </div>
         </div>
         <Link href="/juegos/memory" className="block w-full text-center bg-blue-500 text-white py-3 rounded-xl font-bold shadow active:scale-95 transition-transform">
-          Jugar Ahora
+          Jugar
         </Link>
       </div>
 
@@ -30,12 +30,12 @@ export default function MenuJuegos() {
             <Zap size={28} />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-800">Runner Nerea</h2>
+            <h2 className="text-xl font-bold text-gray-800">Corre pocha</h2>
             <p className="text-xs text-gray-400">Esquiva lo malo, coge lo bueno</p>
           </div>
         </div>
         <Link href="/juegos/run" className="block w-full text-center bg-green-500 text-white py-3 rounded-xl font-bold shadow active:scale-95 transition-transform">
-          Jugar Ahora
+          Jugar
         </Link>
       </div>
 
