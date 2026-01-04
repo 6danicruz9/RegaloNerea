@@ -1,9 +1,12 @@
 'use client';
-import { useState } from 'react';
-import { Gift, Utensils, Plane, MonitorPlay } from 'lucide-react'; // Iconos
+import { useState, useEffect } from 'react';
+import { Gift, Utensils, Plane, MonitorPlay } from 'lucide-react';
 import { usePuntos } from '@/app/context/PuntosContext';
+import confetti from 'canvas-confetti'; // Importamos el confeti
+import { db } from '@/app/lib/firebase'; // Importamos Firebase
+import { collection, addDoc, query, onSnapshot } from 'firebase/firestore';
 
-// TUS CUPONES (Ahora con costo en puntos)
+// TUS CUPONES
 const VALES = [
   { id: 1, titulo: "Cena Romántica", desc: "Donde tú elijas, yo invito.", icon: <Utensils />, costo: 300 },
   { id: 2, titulo: "Masaje 20min", desc: "Sin quejas, solo relax.", icon: <Gift />, costo: 150 },
@@ -11,15 +14,25 @@ const VALES = [
   { id: 4, titulo: "Escapada", desc: "Un fin de semana sorpresa.", icon: <Plane />, costo: 500 },
 ];
 
-const NUMERO_WHATSAPP = "+34629429882"; // <-- CAMBIAR POR TU NÚMERO
+const NUMERO_WHATSAPP = "+34629429882"; // Tu número
 
 export default function Regalos() {
-  const { puntos, usarPuntos } = usePuntos();
+  const { puntos, agregarPuntos } = usePuntos();
   const [gastados, setGastados] = useState<number[]>([]);
   const [mensajeError, setMensajeError] = useState("");
 
-  const canjear = (id: number, titulo: string, costo: number) => {
-    // Limpiar mensaje anterior
+  // 1. ESCUCHAR EL HISTORIAL DE COMPRAS (Persistencia)
+  useEffect(() => {
+    const q = query(collection(db, "historial_canjes"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      // Sacamos los IDs de los regalos que ya están en la base de datos
+      const idsGastados = snapshot.docs.map(doc => doc.data().idRegalo);
+      setGastados(idsGastados);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const canjear = async (id: number, titulo: string, costo: number) => {
     setMensajeError("");
 
     if (gastados.includes(id)) {
@@ -33,29 +46,48 @@ export default function Regalos() {
     }
 
     if (confirm(`¿Seguro que quieres gastar ${costo} puntos para canjear "${titulo}"?`)) {
-      if (usarPuntos(costo)) {
-        setGastados([...gastados, id]);
-        // Enviar WhatsApp automático
-        const mensaje = `¡Hola! Quiero canjear mi vale: "${titulo} jambo"`;
-        const urlWhatsApp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
-        window.open(urlWhatsApp, '_blank');
-      }
+      agregarPuntos(-costo);
+      setGastados([...gastados, id]);
+      
+      // A) ¡LANZAR CONFETI! 🎉
+      confetti({ 
+          particleCount: 150, 
+          spread: 70, 
+          origin: { y: 0.6 },
+          colors: ['#ec4899', '#fbbf24', '#ffffff']
+      });
+
+      // B) GUARDAR EN FIREBASE
+      await addDoc(collection(db, "historial_canjes"), {
+          idRegalo: id,
+          titulo: titulo,
+          fecha: new Date(),
+          costo: costo
+      });
+
+      // C) AVISAR POR WHATSAPP
+      const mensaje = `¡Hola! Acabo de canjear mis puntos por: "${titulo}". ¡Prepárate! 🎁`;
+      const urlWhatsApp = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+      
+      setTimeout(() => {
+           window.open(urlWhatsApp, '_blank');
+      }, 1500);
     }
   };
 
   return (
     <div className="p-6 pt-10 pb-24 min-h-screen bg-pink-50">
       {/* Contador global de puntos */}
-      <div className="mb-6 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-center">
-        <p className="text-gray-600 text-sm">Puntos disponibles</p>
-        <p className="text-4xl font-bold text-yellow-600">💰 {puntos}</p>
+      <div className="mb-6 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-center shadow-sm">
+        <p className="text-gray-600 text-sm font-bold uppercase tracking-wide">Puntos disponibles</p>
+        <p className="text-4xl font-black text-yellow-600">💰 {puntos}</p>
       </div>
 
-      <h1 className="text-3xl font-bold text-pink-600 mb-2 text-center">Tus Regalos</h1>
-      <p className="text-center text-gray-500 mb-8">Canjea tus puntos por estos premios</p>
+      <h1 className="text-3xl font-black text-pink-600 mb-2 text-center font-[family-name:var(--font-pacifico)]">Tus Regalos</h1>
+      <p className="text-center text-gray-500 mb-8 font-medium">Canjea tus puntos por estos premios</p>
 
       {mensajeError && (
-        <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-center">
+        <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-r-lg text-center font-bold animate-pulse">
           {mensajeError}
         </div>
       )}
@@ -70,36 +102,38 @@ export default function Regalos() {
               key={vale.id}
               onClick={() => !estaGastado && canjear(vale.id, vale.titulo, vale.costo)}
               className={`
-                relative p-6 rounded-2xl shadow-md border-2 transition-all duration-300 flex items-center gap-4 cursor-pointer
+                relative p-6 rounded-2xl shadow-md border-2 transition-all duration-300 flex items-center gap-4 cursor-pointer overflow-hidden
                 ${estaGastado 
                   ? 'bg-gray-100 border-gray-200 opacity-60 grayscale' 
                   : puntosInsuficientes
-                  ? 'bg-gray-50 border-gray-300 opacity-70'
-                  : 'bg-white border-pink-100 active:scale-95 hover:shadow-lg'
+                  ? 'bg-white border-gray-200 opacity-70' // Cambio visual sutil si no tiene puntos
+                  : 'bg-white border-pink-200 hover:border-pink-400 hover:shadow-xl hover:scale-[1.02] active:scale-95'
                 }
               `}
             >
-              <div className={`p-4 rounded-full ${estaGastado ? 'bg-gray-200' : 'bg-pink-100 text-pink-500'}`}>
+              <div className={`p-4 rounded-full text-2xl ${estaGastado ? 'bg-gray-200' : 'bg-pink-100 text-pink-500'}`}>
                 {vale.icon}
               </div>
               <div className="flex-1">
                 <h3 className={`font-bold text-lg ${estaGastado ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
                     {vale.titulo}
                 </h3>
-                <p className="text-xs text-gray-400">{vale.desc}</p>
+                <p className="text-xs text-gray-400 font-medium">{vale.desc}</p>
               </div>
               
               <div className="text-right">
-                <p className={`font-bold text-lg ${puntosInsuficientes ? 'text-red-500' : 'text-pink-600'}`}>
+                <p className={`font-black text-xl ${puntosInsuficientes ? 'text-red-400' : 'text-pink-600'}`}>
                   {vale.costo}
                 </p>
-                <p className="text-xs text-gray-500">puntos</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase">puntos</p>
               </div>
               
               {estaGastado && (
-                <span className="absolute top-2 right-2 text-xs font-bold text-red-400 border border-red-200 px-2 py-1 rounded bg-red-50 rotate-12">
-                  CANJEADO
-                </span>
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-50/50 backdrop-blur-[1px]">
+                     <span className="text-sm font-black text-red-500 border-2 border-red-500 px-3 py-1 rounded-lg bg-white -rotate-12 shadow-lg">
+                    CANJEADO
+                    </span>
+                </div>
               )}
             </div>
           );

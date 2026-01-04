@@ -1,136 +1,232 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { HelpCircle, Heart } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion, Variants } from 'framer-motion';
+import { Heart, ArrowRight, Plane } from 'lucide-react';
 
 // --- CONFIGURACIÓN ---
-const DURACION_VUELO = 6; 
+const FOTO_EL = "/run/danibien.png";   
+const FOTO_ELLA = "/run/nereabien.png"; 
 
-const contenedorHumoVariants: Variants = {
+// --- VARIANTES DE ANIMACIÓN ---
+
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
-  visible: {
+  show: {
     opacity: 1,
-    transition: { staggerChildren: DURACION_VUELO / 10, delayChildren: 0.5 }
+    transition: {
+      staggerChildren: 0.3,
+      delayChildren: 0.5,
+    }
   }
 };
 
-const puffHumoVariants: Variants = {
-  hidden: { scale: 0, opacity: 0, y: 20 },
-  visible: { 
-    scale: [0.5, 1.2, 1], opacity: [0, 0.8, 0.6], y: 0,
-    transition: { duration: 1.5, ease: "easeOut" }
+const popIn: Variants = {
+  hidden: { scale: 0.5, opacity: 0, y: 20 },
+  show: { 
+    scale: 1, 
+    opacity: 1, 
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 15 }
+  }
+};
+
+const photoEntrance: Variants = {
+  hidden: { scale: 0, rotate: -20, opacity: 0 },
+  show: { 
+    scale: 1, 
+    rotate: 0, 
+    opacity: 1,
+    transition: { type: "spring", stiffness: 200, damping: 20, duration: 0.8 }
+  }
+};
+
+const heartbeatLine: Variants = {
+  hidden: { pathLength: 0, opacity: 0 },
+  show: { 
+    pathLength: 1, 
+    opacity: 0.6,
+    transition: { duration: 1.5, ease: "easeInOut" } 
+  }
+};
+
+// CORRECCIÓN AQUÍ: Añadimos 'as const' a 'ease' para solucionar el error de tipo
+const floatingAnimation = {
+  y: [0, -8, 0],
+  transition: {
+    duration: 3,
+    repeat: Infinity,
+    repeatType: "reverse" as const,
+    ease: "easeInOut" as const 
   }
 };
 
 export default function Home() {
-  const [activarEscena, setActivarEscena] = useState(false);
+  const [avionVolando, setAvionVolando] = useState(false);
+  const [corazones, setCorazones] = useState<any[]>([]);
+
+  useEffect(() => {
+    const nuevosCorazones = Array.from({ length: 6 }).map(() => ({
+      x: Math.random() * 100 - 50 + 'vw',
+      scale: Math.random() * 0.5 + 0.5,
+      duration: Math.random() * 5 + 10,
+      delay: Math.random() * 5,
+      size: Math.random() * 30 + 20
+    }));
+    setCorazones(nuevosCorazones);
+  }, []);
+
+  const lanzarAvionYEntrar = () => {
+     setAvionVolando(true);
+     setTimeout(() => {
+        document.getElementById('link-final')?.click();
+     }, 1500);
+  };
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-b from-sky-300 to-sky-100 flex flex-col items-center justify-center relative overflow-hidden font-[family-name:var(--font-nunito)]">
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gradient-to-br from-pink-50 via-purple-50 to-yellow-50 overflow-hidden relative">
+      
+      {/* Fondo con corazones */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+         {corazones.map((corazon, i) => (
+           <motion.div
+             key={i}
+             className="absolute text-pink-200/40"
+             initial={{ y: '100vh', x: corazon.x, scale: corazon.scale }}
+             animate={{ y: '-10vh' }}
+             transition={{ duration: corazon.duration, repeat: Infinity, ease: 'linear', delay: corazon.delay }}
+           >
+             <Heart size={corazon.size} fill="currentColor" />
+           </motion.div>
+         ))}
+      </div>
 
-      <AnimatePresence mode="wait">
-        {!activarEscena ? (
-          <motion.div
-            key="inicio"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, y: -50, transition: { duration: 0.5 } }}
-            className="text-center z-20 bg-white/80 backdrop-blur-sm p-10 rounded-3xl shadow-xl"
-          >
-            <h1 className="text-4xl font-bold text-sky-600 mb-6 font-[family-name:var(--font-pacifico)]">
-              Atención
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="z-10 flex flex-col items-center text-center max-w-md"
+      >
+        {/* 1. Textos de bienvenida */}
+        <motion.div variants={popIn}>
+            <h3 className="text-pink-400 font-bold tracking-widest uppercase mb-2 text-sm">Bienvenida a tu Web</h3>
+        </motion.div>
+
+        <motion.div variants={popIn}>
+            <h1 className="text-4xl md:text-5xl font-black text-gray-800 mb-8 drop-shadow-sm font-[family-name:var(--font-pacifico)] leading-tight">
+            Hola, <span className="text-pink-500 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500">Mi Chica</span>
             </h1>
-            <p className="text-gray-600 mb-8 text-lg">
-              que coño es eso que viene por ahí
-            </p>
+        </motion.div>
+        
+        {/* 2. FOTOS Y CONEXIÓN */}
+        <div className="flex items-center justify-center gap-4 mb-10 w-full relative py-8">
             
-            <motion.button
-              onClick={() => setActivarEscena(true)}
-              whileHover={{ scale: 1.05, backgroundColor: '#0284c7' }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-sky-500 text-white font-bold py-4 px-8 rounded-full shadow-lg flex items-center gap-3 mx-auto text-xl transition-colors"
-            >
-              <HelpCircle size={24} /> A ver
-            </motion.button>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="escena"
-            className="absolute inset-0 w-full h-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-             {/* NUBES DE FONDO */}
-             <motion.div 
-               className="absolute top-20 left-0 text-white opacity-50 text-6xl"
-               initial={{ x: "100vw" }} animate={{ x: "-100vw" }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-             >☁️☁️</motion.div>
-
-            {/* HUMO */}
-            <motion.div 
-              className="absolute top-1/2 left-0 w-full flex justify-center items-center gap-2 -translate-y-4 z-0"
-              variants={contenedorHumoVariants}
-              initial="hidden" animate="visible"
-            >
-              {[...Array(10)].map((_, i) => (
-                <motion.div key={i} variants={puffHumoVariants} className="w-16 h-16 bg-white rounded-full blur-md" />
-              ))}
+            {/* Foto ÉL */}
+            <motion.div variants={photoEntrance} className="relative">
+               <motion.div 
+                  animate={floatingAnimation} 
+                  className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white shadow-xl overflow-hidden relative z-10 bg-blue-100 ring-4 ring-blue-50"
+               >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={FOTO_EL} alt="Él" className="w-full h-full object-cover" />
+               </motion.div>
+               <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full text-xs font-bold text-blue-500 shadow-sm border border-blue-100 z-20">Yo</div>
             </motion.div>
 
-             {/* TEXTO FINAL */}
-            <motion.div
-              className="absolute top-1/2 left-0 w-full text-center z-10 -translate-y-2"
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: DURACION_VUELO - 1.5, duration: 1, type: "spring" }}
-            >
-               <h2 className="text-5xl md:text-7xl font-bold text-pink-500 font-[family-name:var(--font-pacifico)] drop-shadow-lg flex items-center justify-center gap-4">
-                  <Heart className="fill-pink-500 animate-bounce" /> TE QUIERO <Heart className="fill-pink-500 animate-bounce" />
-               </h2>
-            </motion.div>
-
-            {/* PERSONAJES */}
-            <div className="absolute top-1/2 w-full z-20 pointer-events-none">
-              
-              {/* NEREA (Corregida la ruta a /run/nerea.png) */}
-              <motion.div
-                className="absolute left-0"
-                initial={{ x: -200, y: 50 }}
-                animate={{ x: "110vw", y: [50, 40, 50] }} 
-                transition={{ x: { duration: DURACION_VUELO, ease: "linear" }, y: { repeat: Infinity, duration: 0.5 } }}
-              >
-                <img src="/run/nerea.png" alt="Nerea" className="w-32 h-auto object-contain drop-shadow-xl" />
-              </motion.div>
-
-               {/* LAMINE EN AVIÓN (Corregida ruta y añadido emoji de avión) */}
-              <motion.div
-                className="absolute left-0 relative"
-                initial={{ x: -400, y: -50, rotate: -5 }}
-                animate={{ x: "120vw", y: [-50, -60, -50], rotate: 0 }}
-                transition={{ x: { duration: DURACION_VUELO + 0.5, ease: "linear", delay: 0.3 }, y: { repeat: Infinity, duration: 2, ease: "easeInOut" } }}
-              >
-                 <div className="relative">
-                    {/* He puesto un emoji gigante de avión porque no tienes la foto avion.png */}
-                    {/* Si encuentras una foto, descomenta la línea de abajo y borra el span del emoji */}
-                    
-                    <span className="text-[10rem] relative z-10 block leading-none">✈️</span>
-                    
-                    {/* <img src="/run/avion.png" alt="Avión" className="w-64 h-auto object-contain relative z-10 drop-shadow-2xl" /> */}
-
-                    {/* Lamine sentado encima (Ruta corregida) */}
-                    <img 
-                        src="/run/lamine.png" 
-                        alt="Lamine" 
-                        className="w-20 h-20 object-contain absolute -top-4 left-10 z-20 rotate-12"
-                    />
-                 </div>
-              </motion.div>
-
+            {/* Conector central */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-12 z-0">
+               <svg width="100%" height="100%" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <motion.path 
+                     variants={heartbeatLine}
+                     d="M0 20H30L40 5L50 35L60 20H120" 
+                     stroke="#ec4899" 
+                     strokeWidth="3" 
+                     strokeLinecap="round" 
+                     strokeLinejoin="round"
+                  />
+               </svg>
+                <motion.div 
+                  variants={popIn}
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 0.5 }}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-10"
+                >
+                  <Heart className="text-pink-500 w-5 h-5" fill="currentColor" />
+                </motion.div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+
+             {/* Foto ELLA */}
+            <motion.div variants={photoEntrance} className="relative">
+               <motion.div 
+                  animate={floatingAnimation} 
+                  className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white shadow-xl overflow-hidden relative z-10 bg-pink-100 ring-4 ring-pink-50"
+               >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={FOTO_ELLA} alt="Ella" className="w-full h-full object-cover" />
+               </motion.div>
+               <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full text-xs font-bold text-pink-500 shadow-sm border border-pink-100 z-20">Tú</div>
+            </motion.div>
+
+        </div>
+
+        {/* 3. Texto final */}
+        <motion.div variants={popIn} className="mb-8 space-y-2">
+          <p className="text-xl text-gray-700 font-medium">
+             He preparado esto para ti,
+          </p>
+          <p className="text-gray-500 text-sm">
+             Juegos, regalos y mucho trabajo 
+          </p>
+        </motion.div>
+
+        {/* 4. EL AVIÓN Y EL BOTÓN FINAL */}
+        <motion.div 
+            variants={popIn}
+            className="relative w-full flex justify-center"
+        >
+             {/* Avión de papel */}
+             <motion.div
+                initial={{ x: -200, y: 50, opacity: 0, rotate: -10 }}
+                animate={avionVolando ? { 
+                    x: [null, 100, 400], 
+                    y: [null, -50, -100], 
+                    opacity: [null, 1, 0],
+                    rotate: 20
+                } : { 
+                    x: 0, y: 0, opacity: 1, rotate: 0 
+                }}
+                transition={{ 
+                    duration: avionVolando ? 1.5 : 0.8, 
+                    delay: avionVolando ? 0 : 2.5, 
+                    type: avionVolando ? "tween" : "spring",
+                    ease: "easeInOut"
+                }}
+                className="absolute -left-16 top-0 z-20 text-pink-400 pointer-events-none"
+             >
+                <Plane size={40} strokeWidth={1.5} />
+                <motion.div 
+                    initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 2.6, duration: 0.5 }}
+                    className="absolute top-1/2 right-full h-0.5 w-24 bg-gradient-to-r from-transparent to-pink-300 origin-right"
+                >
+                </motion.div>
+             </motion.div>
+
+            {/* Botón principal */}
+            <button
+              onClick={lanzarAvionYEntrar}
+              className="group relative bg-gradient-to-r from-pink-500 to-purple-600 text-white px-10 py-4 rounded-full text-xl font-bold shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95 overflow-hidden z-10"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                 ¡Quiero verlo! <ArrowRight className="group-hover:translate-x-1 transition-transform"/>
+              </span>
+              <div className="absolute inset-0 h-full w-full scale-0 rounded-full transition-all duration-300 group-hover:scale-100 group-hover:bg-white/30"></div>
+            </button>
+            
+            <Link href="/juegos" id="link-final" className="hidden"></Link>
+
+        </motion.div>
+      </motion.div>
+    </main>
   );
 }
