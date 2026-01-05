@@ -24,7 +24,7 @@ const DATOS_INICIALES_PARA_SUBIR = [
     img: "/run/foto1.png", 
     pregunta: "¿De qué tema hablamos primero?",
     opciones: ["De música", "Del gimnasio", "De comida"],
-    correcta: 1 
+    correcta: 0
   },
   {
     orden: 2,
@@ -35,7 +35,7 @@ const DATOS_INICIALES_PARA_SUBIR = [
     img: "/run/foto2.png",
     pregunta: "¿Dónde fue nuestra primera parada?",
     opciones: ["El Valle", "Santa Bárbara", "Safón"],
-    correcta: 0
+    correcta: 1
   },
   {
     orden: 3,
@@ -48,6 +48,51 @@ const DATOS_INICIALES_PARA_SUBIR = [
     opciones: ["Tenía hambre", "Peos", "Tenía frío"],
     correcta: 1
   },
+  {
+    orden: 4,
+    fecha: "2025-10-31",
+    fechaTexto: "31-10-2025",
+    titulo: "Tu primer cumple conmigo",
+    descripcion: "No llevabamos mucho tiempo hablando pero bueno la quimica se notaba.",
+    img: "/run/foto3.png",
+    pregunta: "¿Donde te recogí?",
+    opciones: ["En tu casa", "En Santa Bárbara", "En la estación"],
+    correcta: 2
+  },
+  {
+    orden: 5,
+    fecha: "2025-11-10",
+    fechaTexto: "10-11-2025",
+    titulo: "Mi primer cumple contigo",
+    descripcion: "No lo pase contigo pero te tenia en mi cabeza todo el dia.",
+    img: "/run/foto3.png",
+    pregunta: "¿Que dia cayó mi cumpleaños?",
+    opciones: ["Lunes", "Martes", "Miércoles"],
+    correcta: 0
+  },
+  {
+    orden: 6,
+    fecha: "2025-11-14",
+    fechaTexto: "14-11-2025",
+    titulo: "Tu sorpresa",
+    descripcion: "Vaya sorpresa me diste, aunque en el fondo me lo olía.",
+    img: "/run/foto3.png",
+    pregunta: "¿Que estaba haciendo cuando entraste?",
+    opciones: ["Jugar al fifa", "Cocinar", "Hablar con Cude"],
+    correcta: 2
+  },
+  {
+    orden: 7,
+    fecha: "----/--/--",
+    fechaTexto: "----/--/--",
+    titulo: "Nuestra primera foto",
+    descripcion: "Me encanta subir fotos contigo, para que todo el mundo vea lo guapa que eres.",
+    img: "/run/foto3.png",
+    pregunta: "¿Que dia subi la primera foto contigo?",
+    opciones: ["4 Noviembre", "14 Noviembre", "22 Noviembre"],
+    correcta: 0
+  },
+
 ];
 
 export default function HistoriaPage() {

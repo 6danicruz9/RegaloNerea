@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Gift, Utensils, Plane, MonitorPlay } from 'lucide-react';
+import { Gift, Utensils, Plane, MonitorPlay, Heart, Sunset, Wine, Sparkles } from 'lucide-react';
 import { usePuntos } from '@/app/context/PuntosContext';
 import confetti from 'canvas-confetti'; // Importamos el confeti
 import { db } from '@/app/lib/firebase'; // Importamos Firebase
@@ -8,10 +8,14 @@ import { collection, addDoc, query, onSnapshot } from 'firebase/firestore';
 
 // TUS CUPONES
 const VALES = [
-  { id: 1, titulo: "Cena Romántica", desc: "Donde tú elijas, yo invito.", icon: <Utensils />, costo: 300 },
-  { id: 2, titulo: "Masaje 20min", desc: "Sin quejas, solo relax.", icon: <Gift />, costo: 150 },
-  { id: 3, titulo: "Noche de Cine", desc: "Tú eliges la peli y las snacks.", icon: <MonitorPlay />, costo: 200 },
-  { id: 4, titulo: "Escapada", desc: "Un fin de semana sorpresa.", icon: <Plane />, costo: 500 },
+  { id: 1, titulo: "Cena Romántica", desc: "Donde tú elijas, yo te invito (que no sea mcdonals).", icon: <Utensils />, costo: 5000 },
+  { id: 2, titulo: "Masaje 20min", desc: "Sin quejas, no prometo no tocarte el culo", icon: <Gift />, costo: 1500 },
+  { id: 3, titulo: "Noche de Cine", desc: "Tú eliges todo.", icon: <MonitorPlay />, costo: 4000 },
+  { id: 4, titulo: "Escapada", desc: "Un fin de semana sorpresa.", icon: <Plane />, costo: 30000 },
+  { id: 5, titulo: "Picnic Romántico", desc: "Con vistas pero que sea en verano por dios.", icon: <Sunset />, costo: 2500 },
+  { id: 6, titulo: "Día Spa", desc: "Prefiero singar pero esto no esta mal", icon: <Heart />, costo: 7000 },
+  { id: 7, titulo: "Noche Sorpresa", desc: "Yo planeo todo (como siempre)", icon: <Sparkles />, costo: 10000 },
+   { id: 8, titulo: "Singar por el culo", desc: "Jeje, no es bait", icon: <Sparkles />, costo: 0 },
 ];
 
 const NUMERO_WHATSAPP = "+34629429882"; // Tu número

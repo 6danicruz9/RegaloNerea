@@ -49,11 +49,11 @@ export default function MenuJuegos() {
           </div>
           <div>
             <h2 className="text-2xl font-black text-purple-700">Adivina la Canción</h2>
-            <p className="text-sm text-gray-600 font-medium">3 segundos para adivinar 🎵</p>
+            <p className="text-sm text-gray-600 font-medium">3 segundos para adivinar una cancion nuestra o que me recuerde a ti</p>
           </div>
         </div>
         <Link href="/juegos/cancion" className="block w-full text-center bg-gradient-to-r from-purple-500 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all hover:from-purple-600 hover:to-pink-700">
-          🎶 Jugar
+          Jugar
         </Link>
       </div>
 
