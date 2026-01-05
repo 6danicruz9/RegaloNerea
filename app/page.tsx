@@ -85,7 +85,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gradient-to-br from-pink-50 via-purple-50 to-yellow-50 overflow-hidden relative">
+    <main className="flex min-h-screen flex-col items-center justify-center p-0 bg-gradient-to-br from-pink-50 via-purple-50 to-yellow-50 overflow-hidden relative">
       
       {/* Fondo con corazones */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">

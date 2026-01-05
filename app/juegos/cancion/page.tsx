@@ -209,7 +209,7 @@ export default function AdivinaCancion() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100 p-6 pb-24 font-[family-name:var(--font-nunito)]">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100 p-6 pb-0 font-[family-name:var(--font-nunito)]">
       
       {/* CABECERA */}
       <div className="flex justify-between items-center mb-8 pt-4">

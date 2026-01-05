@@ -2,33 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Star, Plus, X, MapPin, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Lock, Star, Plus, X, MapPin } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { db } from '../lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 
 // --- CONFIGURACIÓN DE LA CARRETERA ---
 const Y_INICIO = 60;    
 const Y_PASO = 160;     
 const X_IZQ = 25;       
-const X_DER = 75;
+const X_DER = 75;      
 
-// --- ANIMACIÓN DE CORAZÓN DIBUJADO ---
-const drawingVariants = {
-  hidden: {
-    strokeDashoffset: 320,
-  },
-  visible: {
-    strokeDashoffset: 0,
-    transition: {
-      duration: 2,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatDelay: 1,
-    },
-  },
-};
-      // TUS NIVELES INICIALES (SOLO SE USARÁN LA PRIMERA VEZ PARA SUBIRLOS A FIREBASE)
+// TUS NIVELES INICIALES
 const DATOS_INICIALES_PARA_SUBIR = [
   {
     orden: 1, 
@@ -70,13 +55,12 @@ export default function HistoriaPage() {
   const [niveles, setNiveles] = useState<any[]>([]); 
   const [nivelSeleccionado, setNivelSeleccionado] = useState<any>(null);
   const [modoNuevoRecuerdo, setModoNuevoRecuerdo] = useState(false);
-  const [totalRecuerdos, setTotalRecuerdos] = useState(0); // Nuevo estado para mostrar contador
   
   const [nuevoFecha, setNuevoFecha] = useState('');
   const [nuevoTitulo, setNuevoTitulo] = useState('');
   const [nuevoDesc, setNuevoDesc] = useState('');
 
-  // 1. CARGA DE DATOS, MIGRACIÓN Y CONTADOR
+  // 1. CARGA DE DATOS
   useEffect(() => {
     const cargarProgreso = async () => {
       const docRef = doc(db, "puntuaciones", "nerea_historia");
@@ -84,36 +68,34 @@ export default function HistoriaPage() {
       if (docSnap.exists()) {
         setNivelMaximo(docSnap.data().nivelActual || 1);
       } else {
-        await setDoc(docRef, { nivelActual: 1, cantidadRecuerdos: 0 });
+        await setDoc(docRef, { nivelActual: 1 });
       }
     };
 
     const q = query(collection(db, "historia"), orderBy("fecha", "asc"));
     const unsubscribe = onSnapshot(q, async (snapshot) => {
-        // A) MIGRACIÓN AUTOMÁTICA (Si está vacío)
         if (snapshot.empty) {
-            console.log("Subiendo niveles iniciales...");
-            for (const nivel of DATOS_INICIALES_PARA_SUBIR) {
-                await addDoc(collection(db, "historia"), { ...nivel, timestamp: new Date() });
+            const statsRef = doc(db, "puntuaciones", "nerea_historia");
+            const statsSnap = await getDoc(statsRef);
+            const yaIniciada = statsSnap.exists() && statsSnap.data().historiaIniciada;
+
+            if (!yaIniciada) {
+                 for (const nivel of DATOS_INICIALES_PARA_SUBIR) {
+                    await addDoc(collection(db, "historia"), { ...nivel, timestamp: new Date() });
+                 }
+                 await setDoc(statsRef, { historiaIniciada: true }, { merge: true });
+                 return; 
             }
+            setNiveles([]);
             return;
         }
 
-        // B) ACTUALIZAR ESTADO LOCAL
         const nivelesCargados = snapshot.docs.map((doc, index) => ({
             id: index + 1,
             dbId: doc.id,
             ...doc.data()
         }));
         setNiveles(nivelesCargados);
-        setTotalRecuerdos(snapshot.size);
-
-        // C) ACTUALIZAR CONTADOR EN BASE DE DATOS (Lo que pediste)
-        // Contar SOLO los recuerdos extras (los que añadió Nerea)
-        const recuerdosExtras = snapshot.docs.filter(doc => doc.data().esRecuerdoExtra).length;
-        const statsRef = doc(db, "puntuaciones", "nerea_historia");
-        // Usamos { merge: true } para no borrar el nivelActual
-        await setDoc(statsRef, { cantidadRecuerdos: recuerdosExtras }, { merge: true });
     });
 
     cargarProgreso();
@@ -152,7 +134,6 @@ export default function HistoriaPage() {
     e.preventDefault();
     if (!nuevoTitulo || !nuevoDesc) return;
     
-    // Guardamos en la colección. El onSnapshot detectará el cambio y actualizará el contador solo.
     await addDoc(collection(db, "historia"), {
       fecha: nuevoFecha, 
       fechaTexto: nuevoFecha.split('-').reverse().join('-'), 
@@ -167,48 +148,34 @@ export default function HistoriaPage() {
     confetti();
   };
 
-  const alturaTotal = Math.max(800, Y_INICIO + (niveles.length + 1) * Y_PASO);
-
-  const eliminarRecuerdo = async () => {
-    if (!nivelSeleccionado) return;
-    
-    if (confirm(`¿Seguro que quieres eliminar "${nivelSeleccionado.titulo}"? No se puede deshacer.`)) {
-      try {
-        await deleteDoc(doc(db, "historia", nivelSeleccionado.dbId));
-        setNivelSeleccionado(null);
-        confetti({ particleCount: 100, spread: 60, origin: { y: 0.6 }, colors: ['#ef4444', '#fca5a5'] });
-      } catch (error) {
-        console.error("Error al eliminar:", error);
-        alert("Error al eliminar el recuerdo");
-      }
-    }
-  };
+  // --- SOLUCIÓN AL SCROLL EXCESIVO ---
+  // Altura exacta basada en el número de niveles
+  const alturaTotal = niveles.length > 0 
+    ? Y_INICIO + (niveles.length) * Y_PASO + 140 
+    : 300; 
 
   return (
     <div className="min-h-screen bg-[#fff0f5] relative overflow-x-hidden font-[family-name:var(--font-nunito)]">
       
       <div className="absolute inset-0 z-0 opacity-[0.4] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#db2777 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
-      {/* CABECERA */}
+      {/* CABECERA (LIMPIA) */}
       <div className="pt-6 pb-4 px-6 sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-pink-100 shadow-sm transition-all">
          <div className="flex justify-between items-center max-w-md mx-auto">
             <h1 className="text-2xl font-black text-pink-600 font-[family-name:var(--font-pacifico)]">
                Nuestra Historia
             </h1>
             
-            {/* ETIQUETAS DE ESTADÍSTICAS */}
-            <div className="flex gap-2">
-                <div className="bg-pink-100 text-pink-600 px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 shadow-sm">
-                    <MapPin size={12} /> Nivel {nivelMaximo}
-                </div>
-
+            <div className="bg-pink-100 text-pink-600 px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 shadow-sm">
+                <MapPin size={12} /> Nivel {nivelMaximo}
             </div>
          </div>
       </div>
 
       {/* --- MAPA --- */}
+      {/* Margen inferior ajustado (mb-24) para que no choque con el menú pero no deje hueco enorme */}
       <div 
-         className="relative w-full max-w-md mx-auto mt-4 z-10"
+         className="relative w-full max-w-md mx-auto mt-4 z-10 mb-24"
          style={{ height: `${alturaTotal}px` }}
       >
         {niveles.length > 0 && (
@@ -279,31 +246,29 @@ export default function HistoriaPage() {
         })}
 
         {/* BOTÓN "+" */}
-        {niveles.length > 0 && (
-            <motion.div 
-                className="absolute"
-                style={{ 
-                    top: Y_INICIO + niveles.length * Y_PASO, 
-                    left: `${niveles.length % 2 === 0 ? X_IZQ : X_DER}%`, 
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 20
-                }}
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
+        <motion.div 
+            className="absolute"
+            style={{ 
+                top: niveles.length > 0 ? Y_INICIO + niveles.length * Y_PASO : Y_INICIO, 
+                left: `${niveles.length % 2 === 0 ? X_IZQ : X_DER}%`, 
+                transform: 'translate(-50%, -50%)',
+                zIndex: 20
+            }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+        >
+            <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setModoNuevoRecuerdo(true)}
+                className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-4 border-yellow-400 text-yellow-500 ring-4 ring-yellow-100"
             >
-                <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setModoNuevoRecuerdo(true)}
-                    className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-4 border-yellow-400 text-yellow-500 ring-4 ring-yellow-100"
-                >
-                    <Plus size={32} strokeWidth={4} />
-                </motion.button>
-            </motion.div>
-        )}
+                <Plus size={32} strokeWidth={4} />
+            </motion.button>
+        </motion.div>
       </div>
 
-      {/* --- MODAL DETALLE (PEQUEÑO Y COMPACTO) --- */}
+      {/* --- MODAL DETALLE --- */}
       <AnimatePresence>
         {nivelSeleccionado && (
           <motion.div 
@@ -320,36 +285,12 @@ export default function HistoriaPage() {
             >
               <div className="overflow-y-auto custom-scrollbar">
                   
-                  {/* IMAGEN REDUCIDA - PIZARRA CON CORAZÓN */}
-                  <div className="h-40 bg-gradient-to-br from-slate-900 to-slate-800 relative group overflow-hidden">
+                  {/* IMAGEN */}
+                  <div className="h-40 bg-gray-100 relative group">
                      {nivelSeleccionado.img ? (
                         <img src={nivelSeleccionado.img} alt="Recuerdo" className="w-full h-full object-cover" />
                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 relative">
-                          {/* EFECTO DE PIZARRA */}
-                          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '4px 4px' }}></div>
-                          
-                          {/* CORAZÓN SVG DIBUJADO */}
-                          <svg 
-                            width="120" 
-                            height="120" 
-                            viewBox="0 0 120 120" 
-                            className="relative z-10"
-                          >
-                            <motion.path
-                              d="M60,105 C35,85 10,70 10,50 C10,35 20,25 30,25 C40,25 50,35 60,45 C70,35 80,25 90,25 C100,25 110,35 110,50 C110,70 85,85 60,105 Z"
-                              fill="none"
-                              stroke="#ec4899"
-                              strokeWidth="2.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeDasharray="320"
-                              variants={drawingVariants}
-                              initial="hidden"
-                              animate="visible"
-                            />
-                          </svg>
-                        </div>
+                        <div className="w-full h-full flex items-center justify-center bg-pink-100 text-4xl">📸</div>
                      )}
                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4">
                         <h3 className="text-xl font-bold text-white font-[family-name:var(--font-pacifico)] drop-shadow-md leading-tight">
@@ -395,19 +336,6 @@ export default function HistoriaPage() {
                         </div>
                     )}
                   </div>
-
-                  {/* BOTÓN DE ELIMINAR PARA RECUERDOS EXTRAS */}
-                  {nivelSeleccionado.esRecuerdoExtra && (
-                    <div className="px-5 pb-5 border-t border-gray-200">
-                      <button
-                        onClick={eliminarRecuerdo}
-                        className="w-full mt-4 p-3 bg-red-50 hover:bg-red-100 border-2 border-red-200 text-red-600 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 active:scale-95"
-                      >
-                        <Trash2 size={18} />
-                        Eliminar Recuerdo
-                      </button>
-                    </div>
-                  )}
               </div>
             </motion.div>
           </motion.div>

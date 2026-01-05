@@ -3,7 +3,7 @@ import { Puzzle, Music, Zap } from "lucide-react";
 
 export default function MenuJuegos() {
   return (
-    <div className="p-6 pt-10 pb-24 min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-pink-100 flex flex-col gap-8">
+    <div className="p-6 pt-10 pb-0 min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-pink-100 flex flex-col gap-8">
       <div className="text-center mb-4">
         <h1 className="text-4xl font-black text-pink-600 mb-3 text-center font-[family-name:var(--font-pacifico)] drop-shadow-sm">Zona de Juegos</h1>
         <p className="text-center text-gray-500 font-medium text-lg">Gana puntos para desbloquear cupones</p>

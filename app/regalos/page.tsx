@@ -76,7 +76,7 @@ export default function Regalos() {
   };
 
   return (
-    <div className="p-6 pt-10 pb-24 min-h-screen bg-pink-50">
+    <div className="p-6 pt-10 pb-0 min-h-screen bg-pink-50">
       {/* Contador global de puntos */}
       <div className="mb-6 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-center shadow-sm">
         <p className="text-gray-600 text-sm font-bold uppercase tracking-wide">Puntos disponibles</p>
