@@ -54,10 +54,12 @@ export default function RunnerGame() {
     
     distanciaRef.current += velocidadActual * 0.5;
 
+    // OPTIMIZACIÓN 1: Actualizar estado de puntos solo si cambia
     const puntosDistancia = Math.floor(distanciaRef.current / 100);
     if (puntosDistancia > scoreRef.current) {
       scoreRef.current = puntosDistancia;
-      setPuntosPartida(scoreRef.current);
+      // Solo actualizamos React cada 10 puntos para no saturar el render
+      if (puntosDistancia % 5 === 0) setPuntosPartida(scoreRef.current);
     }
     
     gameState.current.personajeY += gameState.current.velocidadY;
@@ -74,21 +76,14 @@ export default function RunnerGame() {
         montañasRef.current.style.backgroundPositionX = `${gameState.current.montañasX}px`;
     }
 
-    // --- RENDERIZADO VISUAL MEJORADO ---
+    // --- RENDERIZADO VISUAL ---
     if (personajeRef.current) {
-        // SOLUCIÓN 2: "Vida" (Bobbing)
-        // Calculamos un pequeño movimiento de sube y baja usando el tiempo
-        const bobbing = gameState.current.saltando ? 0 : Math.sin(time / 150) * 5; // 5px de movimiento
-        
-        // Aplicamos la posición Y + el pequeño movimiento de correr
+        const bobbing = gameState.current.saltando ? 0 : Math.sin(time / 150) * 5;
         personajeRef.current.style.transform = `translateY(${-gameState.current.personajeY - bobbing}px)`;
-        
-        // Rotación al saltar
         personajeRef.current.style.rotate = gameState.current.personajeY > 0 ? '-5deg' : '0deg';
     }
 
     if (sombraRef.current) {
-        // La sombra también se anima ligeramente con el bobbing para más realismo
         const bobbingScale = gameState.current.saltando ? 0 : Math.sin(time / 150) * 0.05;
         const scale = 1 - (gameState.current.personajeY / 150) + bobbingScale;
         const opacity = 0.5 - (gameState.current.personajeY / 200);
@@ -165,21 +160,20 @@ export default function RunnerGame() {
     >
       <style jsx>{`
         @keyframes moveCloud { from { transform: translateX(100vw); } to { transform: translateX(-150vw); } }
-        /* SOLUCIÓN 3: Clase para el borde blanco estilo "Recorte" */
+        /* OPTIMIZACIÓN 2: Un solo filtro más ligero */
         .imagen-recorte {
-            filter: drop-shadow(0 2px 1px rgba(0,0,0,0.1)) /* Sombra sutil abajo */
-                    drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 1px 0 white) drop-shadow(0 -1px 0 white); /* Borde blanco */
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); /* Solo sombra, sin borde múltiple */
         }
       `}</style>
 
-      {/* FONDO (CIELO, NUBES, MONTAÑAS) - IGUAL QUE ANTES */}
+      {/* FONDO (OPTIMIZADO) */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#5F9EA0] to-[#87CEEB] z-0" />
       <div className="absolute top-10 text-white/50 text-7xl" style={{ animation: 'moveCloud 35s linear infinite', left: '-20vw' }}>☁️</div>
       <div className="absolute top-24 text-white/40 text-9xl" style={{ animation: 'moveCloud 25s linear infinite', animationDelay: '-10s', left: '-20vw' }}>☁️</div>
       <div className="absolute top-40 text-white/30 text-6xl" style={{ animation: 'moveCloud 20s linear infinite', animationDelay: '-5s', left: '-20vw' }}>☁️</div>
-      <div ref={montañasRef} className="absolute bottom-24 w-full h-48 z-10" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320'%3E%3Cpath fill='%234682B4' fill-opacity='0.5' d='M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,256C960,245,1056,203,1152,181.3C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3Cpath fill='%236A5ACD' fill-opacity='0.3' d='M0,160L60,170.7C120,181,240,203,360,202.7C480,203,600,181,720,186.7C840,192,960,224,1080,218.7C1200,213,1320,171,1380,149.3L1440,128L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'repeat-x', backgroundSize: 'auto 100%', backgroundPosition: '0px bottom' }} />
+      <div ref={montañasRef} className="absolute bottom-24 w-full h-48 z-10" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320'%3E%3Cpath fill='%234682B4' fill-opacity='0.5' d='M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,256C960,245,1056,203,1152,181.3C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3Cpath fill='%236A5ACD' fill-opacity='0.3' d='M0,160L60,170.7C120,181,240,203,360,202.7C480,203,600,181,720,186.7C840,192,960,224,1080,218.7C1200,213,1320,171,1380,149.3L1440,128L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'repeat-x', backgroundSize: 'auto 100%', backgroundPosition: '0px bottom', willChange: 'background-position' }} />
 
-      {/* HUD (IGUAL QUE ANTES) */}
+      {/* HUD */}
       <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start z-40 pointer-events-none">
           <div className="pointer-events-auto">
              <Link href="/juegos" className="w-12 h-12 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg flex items-center justify-center text-sky-600 hover:scale-105 transition-transform border border-white/50">
@@ -201,7 +195,7 @@ export default function RunnerGame() {
         <div className="absolute left-10 bottom-28 z-40 w-24 h-40 flex justify-center items-end">
              <div ref={sombraRef} className="absolute bottom-2 w-16 h-4 bg-black/30 rounded-[50%] blur-md transition-transform" />
              <div ref={personajeRef} className="relative will-change-transform">
-                {/* SOLUCIÓN 1 & 3: Quitamos 'drop-shadow-xl' y añadimos 'imagen-recorte' */}
+                {/* APLICAMOS LA CLASE OPTIMIZADA */}
                 <img 
                     src={gameOver ? FOTO_GAME_OVER : FOTO_ELLA} 
                     alt="Personaje"
@@ -213,7 +207,7 @@ export default function RunnerGame() {
 
         {/* OBSTÁCULOS */}
         {objetos.map(obj => (
-            <div key={obj.id} className="absolute z-30 flex flex-col items-center justify-end" style={{ left: `${obj.x}px`, bottom: '110px', width: '60px', height: '60px' }}>
+            <div key={obj.id} className="absolute z-30 flex flex-col items-center justify-end will-change-transform" style={{ left: `${obj.x}px`, bottom: '110px', width: '60px', height: '60px' }}>
                {obj.colisionado ? (
                   <div className="absolute -top-12 flex flex-col items-center animate-bounce">
                       <span className="text-yellow-400 font-black text-xl text-shadow-sm">+5</span>
@@ -221,7 +215,6 @@ export default function RunnerGame() {
                   </div>
                ) : (
                   <>
-                    {/* SOLUCIÓN 1 & 3: Quitamos 'drop-shadow-lg' y añadimos 'imagen-recorte' */}
                     <img 
                         src={obj.emoji} 
                         alt="Objeto"
@@ -234,7 +227,7 @@ export default function RunnerGame() {
         ))}
       </div>
 
-      {/* MENÚS (IGUAL QUE ANTES) */}
+      {/* MENÚS */}
       {!jugando && !gameOver && (
          <div className="absolute inset-0 bg-black/30 backdrop-blur-[3px] z-50 flex flex-col items-center justify-center">
              <div className="bg-white p-6 rounded-3xl shadow-2xl text-center border-4 border-white/50 animate-in zoom-in duration-300">
@@ -250,7 +243,6 @@ export default function RunnerGame() {
             <div className="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-[85%] text-center border-4 border-red-100 animate-in slide-in-from-bottom duration-300">
                 <div className="relative mx-auto mb-4 w-28 h-28">
                      <div className="absolute inset-0 bg-red-100 rounded-full animate-ping opacity-20"></div>
-                     {/* SOLUCIÓN 3: Borde también en el Game Over */}
                      <img src={FOTO_GAME_OVER} alt="Game Over" className="w-28 h-28 object-contain relative z-10 imagen-recorte rotate-12" />
                 </div>
                 <h2 className="text-3xl font-black text-red-500 mb-1 uppercase tracking-wider">¡Ups!</h2>
