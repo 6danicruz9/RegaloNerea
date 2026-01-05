@@ -11,9 +11,24 @@ import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, orderBy, onS
 const Y_INICIO = 60;    
 const Y_PASO = 160;     
 const X_IZQ = 25;       
-const X_DER = 75;      
+const X_DER = 75;
 
-// TUS NIVELES INICIALES (SOLO SE USARÁN LA PRIMERA VEZ PARA SUBIRLOS A FIREBASE)
+// --- ANIMACIÓN DE CORAZÓN DIBUJADO ---
+const drawingVariants = {
+  hidden: {
+    strokeDashoffset: 320,
+  },
+  visible: {
+    strokeDashoffset: 0,
+    transition: {
+      duration: 2,
+      ease: "easeInOut",
+      repeat: Infinity,
+      repeatDelay: 1,
+    },
+  },
+};
+      // TUS NIVELES INICIALES (SOLO SE USARÁN LA PRIMERA VEZ PARA SUBIRLOS A FIREBASE)
 const DATOS_INICIALES_PARA_SUBIR = [
   {
     orden: 1, 
@@ -305,12 +320,36 @@ export default function HistoriaPage() {
             >
               <div className="overflow-y-auto custom-scrollbar">
                   
-                  {/* IMAGEN REDUCIDA */}
-                  <div className="h-40 bg-gradient-to-br from-pink-100 to-purple-100 relative group">
+                  {/* IMAGEN REDUCIDA - PIZARRA CON CORAZÓN */}
+                  <div className="h-40 bg-gradient-to-br from-slate-900 to-slate-800 relative group overflow-hidden">
                      {nivelSeleccionado.img ? (
                         <img src={nivelSeleccionado.img} alt="Recuerdo" className="w-full h-full object-cover" />
                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-pink-100 text-6xl">✨</div>
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 relative">
+                          {/* EFECTO DE PIZARRA */}
+                          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '4px 4px' }}></div>
+                          
+                          {/* CORAZÓN SVG DIBUJADO */}
+                          <svg 
+                            width="120" 
+                            height="120" 
+                            viewBox="0 0 120 120" 
+                            className="relative z-10"
+                          >
+                            <motion.path
+                              d="M60,105 C35,85 10,70 10,50 C10,35 20,25 30,25 C40,25 50,35 60,45 C70,35 80,25 90,25 C100,25 110,35 110,50 C110,70 85,85 60,105 Z"
+                              fill="none"
+                              stroke="#ec4899"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeDasharray="320"
+                              variants={drawingVariants}
+                              initial="hidden"
+                              animate="visible"
+                            />
+                          </svg>
+                        </div>
                      )}
                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4">
                         <h3 className="text-xl font-bold text-white font-[family-name:var(--font-pacifico)] drop-shadow-md leading-tight">
