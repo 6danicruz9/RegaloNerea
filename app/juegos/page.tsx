@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Puzzle, HelpCircle, Zap } from "lucide-react";
+import { Puzzle, Music, Zap } from "lucide-react";
 
 export default function MenuJuegos() {
   return (
     <div className="p-6 pt-10 pb-24 min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-pink-100 flex flex-col gap-8">
       <div className="text-center mb-4">
         <h1 className="text-4xl font-black text-pink-600 mb-3 text-center font-[family-name:var(--font-pacifico)] drop-shadow-sm">Zona de Juegos</h1>
-        <p className="text-center text-gray-500 font-medium text-lg">Gana puntos para desbloquear tu regalo final</p>
+        <p className="text-center text-gray-500 font-medium text-lg">Gana puntos para desbloquear cupones</p>
       </div>
       
       {/* JUEGO 1: Memory */}
@@ -21,7 +21,7 @@ export default function MenuJuegos() {
           </div>
         </div>
         <Link href="/juegos/memory" className="block w-full text-center bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all hover:from-blue-600 hover:to-blue-700">
-          🎮 Jugar
+          Jugar
         </Link>
       </div>
 
@@ -37,24 +37,24 @@ export default function MenuJuegos() {
           </div>
         </div>
         <Link href="/juegos/run" className="block w-full text-center bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all hover:from-green-600 hover:to-emerald-700">
-          ⚡ Jugar
+           Jugar
         </Link>
       </div>
 
-      {/* JUEGO 3: Quiz (Próximamente) */}
-      <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-6 rounded-3xl shadow-md border-2 border-purple-200 opacity-70 cursor-not-allowed">
+      {/* JUEGO 3: Adivina la Canción */}
+      <div className="bg-gradient-to-br from-purple-50 to-pink-100 p-6 rounded-3xl shadow-lg border-2 border-purple-200 hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
         <div className="flex items-center gap-4 mb-6">
-          <div className="p-4 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-full shadow-lg">
-            <HelpCircle size={32} />
+          <div className="p-4 bg-gradient-to-br from-purple-400 to-pink-600 text-white rounded-full shadow-lg">
+            <Music size={32} />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-purple-700">Quiz Nerea</h2>
-            <p className="text-sm text-purple-600 font-medium">Demuestra lo que sabes</p>
+            <h2 className="text-2xl font-black text-purple-700">Adivina la Canción</h2>
+            <p className="text-sm text-gray-600 font-medium">3 segundos para adivinar 🎵</p>
           </div>
         </div>
-        <button className="w-full bg-gradient-to-r from-purple-300 to-purple-400 text-purple-700 py-4 rounded-2xl font-bold cursor-not-allowed text-lg">
-          🔒 Próximamente
-        </button>
+        <Link href="/juegos/cancion" className="block w-full text-center bg-gradient-to-r from-purple-500 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all hover:from-purple-600 hover:to-pink-700">
+          🎶 Jugar
+        </Link>
       </div>
 
     </div>
