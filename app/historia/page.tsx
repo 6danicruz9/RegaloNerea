@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Star, Plus, X, MapPin, Image as ImageIcon } from 'lucide-react';
+import { Lock, Star, Plus, X, MapPin, Image as ImageIcon, Trash2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { db } from '../lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, deleteDoc } from 'firebase/firestore';
 
 // --- CONFIGURACIÓN DE LA CARRETERA ---
 const Y_INICIO = 60;    
@@ -94,10 +94,11 @@ export default function HistoriaPage() {
         setTotalRecuerdos(snapshot.size);
 
         // C) ACTUALIZAR CONTADOR EN BASE DE DATOS (Lo que pediste)
-        // Cada vez que cambie la lista, actualizamos el campo 'cantidadRecuerdos' en puntuaciones
+        // Contar SOLO los recuerdos extras (los que añadió Nerea)
+        const recuerdosExtras = snapshot.docs.filter(doc => doc.data().esRecuerdoExtra).length;
         const statsRef = doc(db, "puntuaciones", "nerea_historia");
         // Usamos { merge: true } para no borrar el nivelActual
-        await setDoc(statsRef, { cantidadRecuerdos: snapshot.size }, { merge: true });
+        await setDoc(statsRef, { cantidadRecuerdos: recuerdosExtras }, { merge: true });
     });
 
     cargarProgreso();
@@ -152,6 +153,21 @@ export default function HistoriaPage() {
   };
 
   const alturaTotal = Math.max(800, Y_INICIO + (niveles.length + 1) * Y_PASO);
+
+  const eliminarRecuerdo = async () => {
+    if (!nivelSeleccionado) return;
+    
+    if (confirm(`¿Seguro que quieres eliminar "${nivelSeleccionado.titulo}"? No se puede deshacer.`)) {
+      try {
+        await deleteDoc(doc(db, "historia", nivelSeleccionado.dbId));
+        setNivelSeleccionado(null);
+        confetti({ particleCount: 100, spread: 60, origin: { y: 0.6 }, colors: ['#ef4444', '#fca5a5'] });
+      } catch (error) {
+        console.error("Error al eliminar:", error);
+        alert("Error al eliminar el recuerdo");
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#fff0f5] relative overflow-x-hidden font-[family-name:var(--font-nunito)]">
@@ -290,11 +306,11 @@ export default function HistoriaPage() {
               <div className="overflow-y-auto custom-scrollbar">
                   
                   {/* IMAGEN REDUCIDA */}
-                  <div className="h-40 bg-gray-100 relative group">
+                  <div className="h-40 bg-gradient-to-br from-pink-100 to-purple-100 relative group">
                      {nivelSeleccionado.img ? (
                         <img src={nivelSeleccionado.img} alt="Recuerdo" className="w-full h-full object-cover" />
                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-pink-100 text-4xl">📸</div>
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-pink-100 text-6xl">✨</div>
                      )}
                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4">
                         <h3 className="text-xl font-bold text-white font-[family-name:var(--font-pacifico)] drop-shadow-md leading-tight">
@@ -340,6 +356,19 @@ export default function HistoriaPage() {
                         </div>
                     )}
                   </div>
+
+                  {/* BOTÓN DE ELIMINAR PARA RECUERDOS EXTRAS */}
+                  {nivelSeleccionado.esRecuerdoExtra && (
+                    <div className="px-5 pb-5 border-t border-gray-200">
+                      <button
+                        onClick={eliminarRecuerdo}
+                        className="w-full mt-4 p-3 bg-red-50 hover:bg-red-100 border-2 border-red-200 text-red-600 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 active:scale-95"
+                      >
+                        <Trash2 size={18} />
+                        Eliminar Recuerdo
+                      </button>
+                    </div>
+                  )}
               </div>
             </motion.div>
           </motion.div>

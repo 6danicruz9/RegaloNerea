@@ -76,3 +76,10 @@ input[type="password"] {
 input[type="password"]::placeholder {
   color: #999999;
 }
+/* Ocultar el icono de desarrollo de Next.js */
+[data-nextjs-dialog-overlay],
+[data-nextjs-toast],
+button[aria-label*="Open"],
+button[aria-label*="next"] {
+  display: none !important;
+}
