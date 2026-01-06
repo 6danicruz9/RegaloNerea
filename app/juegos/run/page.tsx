@@ -12,10 +12,10 @@ const FOTOS_MALAS = ["/run/dani.png"];
 const FOTOS_BUENAS = ["/run/dylan.png", "/run/bimba.png"]; 
 
 // --- VARIABLES FÍSICAS ---
-const VELOCIDAD_BASE = 5;  
+const VELOCIDAD_BASE = 6.5;  
 const GRAVEDAD = 0.6;
 const FUERZA_SALTO = 12; 
-const MIN_DISTANCIA = 350; 
+const MIN_DISTANCIA = 300; 
 
 export default function RunnerGame() {
   const { puntos: puntosGlobales, sumarPuntos } = usePuntos();
@@ -50,7 +50,7 @@ export default function RunnerGame() {
   // --- MOTOR DEL JUEGO ---
   const update = (time: number) => {
     const velocidadActual = VELOCIDAD_BASE + (distanciaRef.current / 5000) * 1;
-    const frecuenciaObstaculos = 0.015 + (distanciaRef.current / 5000) * 0.003;
+    const frecuenciaObstaculos = 0.025 + (distanciaRef.current / 5000) * 0.004;
     
     distanciaRef.current += velocidadActual * 0.5;
 
