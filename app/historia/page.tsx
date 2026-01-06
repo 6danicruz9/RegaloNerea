@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Star, Plus, X, MapPin } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { db } from '../lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, deleteDoc } from 'firebase/firestore';
 
 // --- CONFIGURACIÓN DE LA CARRETERA ---
 const Y_INICIO = 60;    
@@ -353,6 +353,21 @@ export default function HistoriaPage() {
     confetti();
   };
 
+  const eliminarRecuerdo = async () => {
+    if (!nivelSeleccionado || !nivelSeleccionado.dbId) return;
+    
+    if (confirm('¿Estás seguro de que quieres eliminar este recuerdo?')) {
+      try {
+        await deleteDoc(doc(db, "historia", nivelSeleccionado.dbId));
+        setNivelSeleccionado(null);
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#ec4899', '#fbbf24'] });
+      } catch (e) {
+        console.error("Error eliminando recuerdo:", e);
+        alert("Error al eliminar el recuerdo");
+      }
+    }
+  };
+
   // --- SOLUCIÓN AL SCROLL EXCESIVO ---
   // Altura exacta basada en el número de niveles
   const alturaTotal = niveles.length > 0 
@@ -517,6 +532,17 @@ export default function HistoriaPage() {
                         </h3>
                      </div>
                      <button onClick={() => setNivelSeleccionado(null)} className="absolute top-3 right-3 bg-white/20 hover:bg-white/40 text-white p-1.5 rounded-full backdrop-blur-md transition-colors"><X size={16}/></button>
+                     {nivelSeleccionado.esRecuerdoExtra && (
+                       <motion.button 
+                         whileHover={{ scale: 1.1 }}
+                         whileTap={{ scale: 0.9 }}
+                         onClick={eliminarRecuerdo} 
+                         className="absolute top-3 left-3 bg-red-500/80 hover:bg-red-600 text-white p-1.5 rounded-full backdrop-blur-md transition-colors"
+                         title="Eliminar recuerdo"
+                       >
+                         <X size={16}/>
+                       </motion.button>
+                     )}
                   </div>
 
                   <div className="p-5">
