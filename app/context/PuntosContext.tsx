@@ -21,7 +21,12 @@ export function PuntosProvider({ children }: { children: ReactNode }) {
       if (docSnap.exists()) {
         setPuntos(docSnap.data().total || 0);
       } else {
-        setDoc(docSnap.ref, { total: 0 });
+        // Si el documento no existe, lo creamos con 0 puntos
+        setDoc(doc(db, "puntuaciones", "nerea"), { total: 0 }).catch(e => {
+          console.error("Error creando documento:", e);
+          setPuntos(0);
+        });
+        setPuntos(0);
       }
     });
     return () => unsubscribe();
@@ -32,6 +37,8 @@ export function PuntosProvider({ children }: { children: ReactNode }) {
     const nuevoTotal = puntos + cantidad;
     try {
       await setDoc(doc(db, "puntuaciones", "nerea"), { total: nuevoTotal }, { merge: true });
+      // Forzar actualización local
+      setPuntos(nuevoTotal);
     } catch (e) {
       console.error("Error guardando:", e);
     }
@@ -43,6 +50,8 @@ export function PuntosProvider({ children }: { children: ReactNode }) {
       const nuevoTotal = puntos - cantidad;
       try {
         await setDoc(doc(db, "puntuaciones", "nerea"), { total: nuevoTotal }, { merge: true });
+        // Forzar actualización local
+        setPuntos(nuevoTotal);
         return true; // Compra exitosa
       } catch (e) {
         console.error("Error restando puntos:", e);

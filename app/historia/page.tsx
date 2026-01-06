@@ -21,7 +21,7 @@ const DATOS_INICIALES_PARA_SUBIR = [
     fechaTexto: "7-10-2025", 
     titulo: "El comienzo",
     descripcion: "Este fue el día que empezamos a hablar, puto mvrk. Aún no me creo la suerte que tuve.",
-    img: "/run/foto1.png", 
+    img: "/run/nivel1.png", 
     pregunta: "¿De qué tema hablamos primero?",
     opciones: ["De música", "Del gimnasio", "De comida"],
     correcta: 0
@@ -32,7 +32,7 @@ const DATOS_INICIALES_PARA_SUBIR = [
     fechaTexto: "18-10-2025",
     titulo: "Nuestra primera cita",
     descripcion: "Estaba súper nervioso y cuando vi que ni me miraste me puse más. Pero estabas preciosa.",
-    img: "/run/foto2.png",
+    img: "/run/nivel2.png",
     pregunta: "¿Dónde fue nuestra primera parada?",
     opciones: ["El Valle", "Santa Bárbara", "Safón"],
     correcta: 1
@@ -43,7 +43,7 @@ const DATOS_INICIALES_PARA_SUBIR = [
     fechaTexto: "19-10-2025",
     titulo: "Primer beso",
     descripcion: "Uno de los mejores días de mi vida. Lo que vas a leer ahora no te lo había contado...",
-    img: "/run/foto3.png",
+    img: "/run/nivel3.png",
     pregunta: "¿Por qué dije de llevarte a casa?",
     opciones: ["Tenía hambre", "Peos", "Tenía frío"],
     correcta: 1
@@ -54,7 +54,7 @@ const DATOS_INICIALES_PARA_SUBIR = [
     fechaTexto: "31-10-2025",
     titulo: "Tu primer cumple conmigo",
     descripcion: "No llevabamos mucho tiempo hablando pero bueno la quimica se notaba.",
-    img: "/run/foto3.png",
+    img: "/run/nivel4.png",
     pregunta: "¿Donde te recogí?",
     opciones: ["En tu casa", "En Santa Bárbara", "En la estación"],
     correcta: 2
@@ -65,7 +65,7 @@ const DATOS_INICIALES_PARA_SUBIR = [
     fechaTexto: "10-11-2025",
     titulo: "Mi primer cumple contigo",
     descripcion: "No lo pase contigo pero te tenia en mi cabeza todo el dia.",
-    img: "/run/foto3.png",
+    img: "/run/nivel5.png",
     pregunta: "¿Que dia cayó mi cumpleaños?",
     opciones: ["Lunes", "Martes", "Miércoles"],
     correcta: 0
@@ -76,7 +76,7 @@ const DATOS_INICIALES_PARA_SUBIR = [
     fechaTexto: "14-11-2025",
     titulo: "Tu sorpresa",
     descripcion: "Vaya sorpresa me diste, aunque en el fondo me lo olía.",
-    img: "/run/foto3.png",
+    img: "/run/nivel6.png",
     pregunta: "¿Que estaba haciendo cuando entraste?",
     opciones: ["Jugar al fifa", "Cocinar", "Hablar con Cude"],
     correcta: 2
@@ -87,11 +87,167 @@ const DATOS_INICIALES_PARA_SUBIR = [
     fechaTexto: "----/--/--",
     titulo: "Nuestra primera foto",
     descripcion: "Me encanta subir fotos contigo, para que todo el mundo vea lo guapa que eres.",
-    img: "/run/foto3.png",
+    img: "/run/nivel7.png",
     pregunta: "¿Que dia subi la primera foto contigo?",
     opciones: ["4 Noviembre", "14 Noviembre", "22 Noviembre"],
     correcta: 0
   },
+  {
+    orden: 8,
+    fecha: "2025-11-14",
+    fechaTexto: "14-11-2025",
+    titulo: "Mas de tu sorpresita",
+    descripcion: "Nada que añadir, ojala me hicieras muchas mas.",
+    img: "/run/nivel8.png",
+    pregunta: "¿Que comimos cuando viniste?",
+    opciones: ["Pollo empanado", "Mc Donals", "Pizza"],
+    correcta: 1
+  },
+  {
+    orden: 9,
+    fecha: "2025-11-14",
+    fechaTexto: "14-11-2025",
+    titulo: "Mas de tu sorpresita parte 3",
+    descripcion: "Nada que añadir, ojala me hicieras muchas mas.",
+    img: "/run/nivel9.png",
+    pregunta: "¿Que hice en cuanto te fuiste?",
+    opciones: ["Tirarme un pedo", "Leerme el libro", "Colgar el cuadro"],
+    correcta: 2
+  },
+  {
+    orden: 10,
+    fecha: "2025-11-22",
+    fechaTexto: "22-11-2025",
+    titulo: "Casa rural",
+    descripcion: "No tiene sentido lo que te eche de menos ese dia.",
+    img: "/run/nivel10.png",
+    pregunta: "¿Que estaba haciendo en esta foto?",
+    opciones: ["Jugar al fifa", "Apostar", "Hablar contigo"],
+    correcta: 2
+  },
+  {
+    orden: 11,
+    fecha: "----/--/--",
+    fechaTexto: "----/--/--",
+    titulo: "Un poco sexual",
+    descripcion: "Lo que mas te gusta guarra.",
+    img: "/run/nivel11.png",
+    pregunta: "¿Que dia me tocaste el pene por primera vez?",
+    opciones: ["14 Novimebre(sorpresa)", "28 Noviembre", "5 Diciembre"],
+    correcta: 2
+  },
+  {
+    orden: 12,
+    fecha: "2025-12-05",
+    fechaTexto: "05-12-2025",
+    titulo: "Conocer a tus padres",
+    descripcion: "Estaba acojonadito.",
+    img: "/run/nivel12.png",
+    pregunta: "¿Donde fuimos antes de ir a tu casa?",
+    opciones: ["Registro", "Policia", "Ayuntamiento"],
+    correcta: 1
+  },
+  {
+    orden: 13,
+    fecha: "2025-12-05",
+    fechaTexto: "05-12-2025",
+    titulo: "Conocer a tus padres parte 2",
+    descripcion: "Estaba acojonadito. ¿por que sigues leyendo? virgen.",
+    img: "/run/nivel13.png",
+    pregunta: "¿Que le regale a Dylan cuando le conoci?",
+    opciones: ["Regalices", "Huevos Kinder", "Pipas"],
+    correcta: 1
+  },
+  {
+    orden: 14,
+    fecha: "2025-12-05",
+    fechaTexto: "05-12-2025",
+    titulo: "Conocer a tus padres parte 3",
+    descripcion: "Estaba acojonadito. ¿por que sigues leyendo? virgen. Si sigues leyendo me debes una foto en tanga. Estas tardando.",
+    img: "/run/nivel14.png",
+    pregunta: "¿Por cuanta diferencia te gane a los bolos?",
+    opciones: ["20", "33", "54"],
+    correcta: 0
+  },
+  {
+    orden: 15,
+    fecha: "2025-12-05",
+    fechaTexto: "05-12-2025",
+    titulo: "Primer plan aesteti",
+    descripcion: "Me sigues debiendo la foto en tanga. No me falles.",
+    img: "/run/nivel15.png",
+    pregunta: "¿Que talla de pie tengo?",
+    opciones: ["44", "43", "45"],
+    correcta: 1
+  },
+  {
+    orden: 16,
+    fecha: "2025-12-19",
+    fechaTexto: "19-12-2025",
+    titulo: "Primera calentada",
+    descripcion: "Cuando tuvimos que ir a por ti, nose porque lo pongo como algo lejano cuando no hace ni un mes.",
+    img: "/run/nivel16.png",
+    pregunta: "¿Que hicimos la primera noche?",
+    opciones: ["Dormir", "Guarrear", "Ver pelis"],
+    correcta: 1
+  },
+  {
+    orden: 17,
+    fecha: "2025-12-20",
+    fechaTexto: "20-12-2025",
+    titulo: "Tu estancia en albacete",
+    descripcion: "A ver si te acuerdas.",
+    img: "/run/nivel17.png",
+    pregunta: "¿Con que finalidad salimos a ver las luces?",
+    opciones: ["Verlas y ya", "Enseñarte el ambiente", "Ver algo en el suelo"],
+    correcta: 2
+  },
+  {
+    orden: 18,
+    fecha: "2025-12-21",
+    fechaTexto: "21-12-2025",
+    titulo: "Tu estancia en albacete",
+    descripcion: "A ver si te acuerdas. Te las estoy poniendio faciles.",
+    img: "/run/nivel1819.png",
+    pregunta: "¿En que posicion estaban contra los que jugamos?",
+    opciones: ["1", "2", "3"],
+    correcta: 0
+  },
+  {
+    orden: 19,
+    fecha: "2025-12-21",
+    fechaTexto: "21-12-2025",
+    titulo: "Tu estancia en albacete",
+    descripcion: "A ver si te acuerdas. Te las estoy poniendio muuuuuuuy faciles.",
+    img: "/run/nivel1819.png",
+    pregunta: "¿En que parte me lesioné.",
+    opciones: ["Gemelo", "Muslo", "Aductor"],
+    correcta: 2
+  },
+  {
+    orden: 20,
+    fecha: "Para siempre",
+    fechaTexto: "Para siempre",
+    titulo: "Siempre seras tu.",
+    descripcion: "Te voy a robar a Bimba",
+    img: "/run/nivel20.png",
+    pregunta: "¿Que siento por ti?",
+    opciones: ["Todo", "Nada", "Me gusta tu culo y ya"],
+    correcta: 0
+  },
+  {
+    orden: 21,
+    fecha: "2025-12-28",
+    fechaTexto: "28-12-2025",
+    titulo: "Nuestro primer meeeeees",
+    descripcion: "Que heavy lo rapido que pasa el tiempo.",
+    img: "/run/nivel21.png",
+    pregunta: "¿Que paso especial este dia?",
+    opciones: ["Follamos", "Hicimos el juego de los colores", "Cenamos"],
+    correcta: 0
+  },
+  
+
 
 ];
 
@@ -117,7 +273,7 @@ export default function HistoriaPage() {
       }
     };
 
-    const q = query(collection(db, "historia"), orderBy("fecha", "asc"));
+    const q = query(collection(db, "historia"), orderBy("orden", "asc"));
     const unsubscribe = onSnapshot(q, async (snapshot) => {
         if (snapshot.empty) {
             const statsRef = doc(db, "puntuaciones", "nerea_historia");
@@ -171,7 +327,7 @@ export default function HistoriaPage() {
       setNivelSeleccionado(null);
     } else {
       if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(200);
-      alert("¡Mec! Inténtalo otra vez, mi amor 😜");
+      alert("Jamba eres lo mas down que existe, piensa");
     }
   };
 
@@ -179,7 +335,11 @@ export default function HistoriaPage() {
     e.preventDefault();
     if (!nuevoTitulo || !nuevoDesc) return;
     
+    // Obtener el siguiente número de orden
+    const nuevoOrden = niveles.length + 1;
+    
     await addDoc(collection(db, "historia"), {
+      orden: nuevoOrden,
       fecha: nuevoFecha, 
       fechaTexto: nuevoFecha.split('-').reverse().join('-'), 
       titulo: nuevoTitulo, 
@@ -331,11 +491,25 @@ export default function HistoriaPage() {
               <div className="overflow-y-auto custom-scrollbar">
                   
                   {/* IMAGEN */}
-                  <div className="h-40 bg-gray-100 relative group">
+                  <div className="h-40 bg-gradient-to-br from-slate-800 to-slate-900 relative group overflow-hidden">
                      {nivelSeleccionado.img ? (
                         <img src={nivelSeleccionado.img} alt="Recuerdo" className="w-full h-full object-cover" />
                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-pink-100 text-4xl">📸</div>
+                        <div className="w-full h-full flex items-center justify-center">
+                           <svg width="120" height="120" viewBox="0 0 120 120" className="drop-shadow-lg">
+                              <motion.path
+                                 d="M60,105 C35,90 15,75 15,55 C15,40 25,30 35,30 C45,30 55,40 60,50 C65,40 75,30 85,30 C95,30 105,40 105,55 C105,75 85,90 60,105 Z"
+                                 fill="none"
+                                 stroke="#ec4899"
+                                 strokeWidth="2.5"
+                                 strokeLinecap="round"
+                                 strokeLinejoin="round"
+                                 initial={{ pathLength: 0 }}
+                                 animate={{ pathLength: 1 }}
+                                 transition={{ duration: 2, ease: "easeInOut", repeat: Infinity }}
+                              />
+                           </svg>
+                        </div>
                      )}
                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4">
                         <h3 className="text-xl font-bold text-white font-[family-name:var(--font-pacifico)] drop-shadow-md leading-tight">

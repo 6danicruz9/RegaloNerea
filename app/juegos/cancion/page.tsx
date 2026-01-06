@@ -49,39 +49,85 @@ const CANCIONES_EJEMPLO: Cancion[] = [
   {
     id: '4',
     titulo: 'Tengan Mi Sangre',
-    artista: 'Unknown',
+    artista: 'DELLAFUENTE',
     audioUrl: '/canciones/tenganmisangre.mp3',
     dificultad: 'dificil',
-    opciones: ['Tengan Mi Sangre', 'Nolahay', 'Amor de ganster', 'Heartbreaker'],
+    opciones: ['Tengan Mi Sangre', 'Nolahay', 'Cuando me acerco a ti', 'No importa que llueva'],
     correcta: 0,
   },
   {
     id: '5',
     titulo: 'Mi Teatro',
-    artista: 'Unknown',
+    artista: 'Dani Martin',
     audioUrl: '/canciones/miteatro.mp3',
     dificultad: 'facil',
-    opciones: ['Mi Teatro', 'Te Como La Cara', 'Emocional', 'Tengan Mi Sangre'],
+    opciones: ['Mi Teatro', 'Te Como La Cara', 'Emocional', 'Como te amo yo'],
     correcta: 0,
   },
   {
     id: '6',
     titulo: 'Te Como La Cara',
-    artista: 'Unknown',
+    artista: 'DELLAFUENTE',
     audioUrl: '/canciones/tecomolacara.mp3',
     dificultad: 'facil',
-    opciones: ['Mi Teatro', 'Te Como La Cara', 'Emocional', 'Heartbreaker'],
+    opciones: ['Mi Teatro', 'Te Como La Cara', 'Emocional', 'Tocate Sola'],
     correcta: 1,
   },
   {
     id: '7',
     titulo: 'Emocional',
-    artista: 'Unknown',
+    artista: 'Dani Martin',
     audioUrl: '/canciones/emocional.mp3',
     dificultad: 'dificil',
     opciones: ['Nolahay', 'Te Como La Cara', 'Emocional', 'Amor de ganster'],
     correcta: 2,
   },
+  {
+    id: '8',
+    titulo: 'Every Breath You Take',
+    artista: 'The Police',
+    audioUrl: '/canciones/EveryBreathYouTake.mp3',
+    dificultad: 'dificil',
+    opciones: ['Every Breath You Take', 'Siempre sale el sol', 'Kisiera yo saber', 'De MENoS'],
+    correcta: 0,
+  },
+  {
+    id: '9',
+    titulo: 'MAI',
+    artista: 'Milo J',
+    audioUrl: '/canciones/mai.mp3',
+    dificultad: 'dificil',
+    opciones: ['Si me miras asi', 'Aiunii', 'MAI', 'De MENoS'],
+    correcta: 2,
+  },
+  {
+    id: '10',
+    titulo: 'B A E 2.0',
+    artista: 'Yapi',
+    audioUrl: '/canciones/bae2.mp3',
+    dificultad: 'dificil',
+    opciones: ['B A E 2.0', 'Seduceme', 'MAI', 'CRACY'],
+    correcta: 0,
+  },
+  {
+    id: '11',
+    titulo: 'Cuando me acerco a ti',
+    artista: 'Danny Ocean',
+    audioUrl: '/canciones/cuandomeacercoati.mp3',
+    dificultad: 'dificil',
+    opciones: ['FREE LOVE', 'Cuando me acerco a ti', 'Aiunii', 'BoKeTe'],
+    correcta: 1,
+  },
+  {
+    id: '12',
+    titulo: 'Aunii',
+    artista: 'Jay Wheeler',
+    audioUrl: '/canciones/aiunii.mp3',
+    dificultad: 'dificil',
+    opciones: ['Tengan mi sangre', 'No le caigo', 'Aiunii', 'Ven abrazame'],
+    correcta: 2,
+  },
+  
 ];
 
 export default function AdivinaCancion() {
@@ -101,6 +147,7 @@ export default function AdivinaCancion() {
   const [dificultad, setDificultad] = useState<'facil' | 'dificil' | 'todas'>('todas');
   const [puntosTotales, setPuntosTotales] = useState(0);
   const [cancionTerminada, setCancionTerminada] = useState(false);
+  const [todasJugadas, setTodasJugadas] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -122,13 +169,10 @@ export default function AdivinaCancion() {
 
     let nuevaCancion: Cancion;
 
-    // 3. Si ya salieron todas, reiniciamos el ciclo
+    // 3. Si ya salieron todas, mostramos el mensaje de límite
     if (cancionesNoJugadas.length === 0) {
-      setJugadas([]); // Limpiamos historial
-      const random = Math.floor(Math.random() * cancionesDisponibles.length);
-      nuevaCancion = cancionesDisponibles[random];
-      // Guardamos esta como la primera de la nueva ronda
-      setJugadas([nuevaCancion.id]); 
+      setTodasJugadas(true); // Mostrar modal de límite alcanzado
+      return;
     } else {
       // 4. Si quedan libres, elegimos una al azar de esas
       const random = Math.floor(Math.random() * cancionesNoJugadas.length);
@@ -355,6 +399,63 @@ export default function AdivinaCancion() {
             <p className="font-bold">Cargando temazos...</p>
         </div>
       )}
+
+      {/* MODAL: LÍMITE ALCANZADO */}
+      <AnimatePresence>
+        {todasJugadas && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.8, y: 20, opacity: 0 }}
+              className="bg-gradient-to-br from-purple-100 via-pink-100 to-purple-100 rounded-3xl p-8 max-w-sm shadow-2xl border-4 border-purple-300 text-center"
+            >
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="text-6xl mb-4"
+              >
+                🎉
+              </motion.div>
+              
+              <h2 className="text-3xl font-black text-purple-600 mb-2 font-[family-name:var(--font-pacifico)]">
+                ¡Lo hiciste!
+              </h2>
+              
+              <p className="text-gray-700 font-bold mb-2">
+                Alcanzaste el límite de canciones
+              </p>
+              
+              <div className="bg-white rounded-2xl p-4 mb-6 border-2 border-purple-200 shadow-md">
+                <p className="text-sm text-gray-600 mb-1">Puntos totales</p>
+                <p className="text-4xl font-black text-purple-600">💰 {puntos}</p>
+              </div>
+              
+              <p className="text-gray-700 font-semibold mb-6">
+                ✨ Próximamente se añadirán más canciones ✨
+              </p>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setTodasJugadas(false);
+                  setJugadas([]);
+                  cargarCancion();
+                }}
+                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:brightness-110 transition-all"
+              >
+                Empezar De Nuevo
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
